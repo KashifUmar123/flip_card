@@ -84,6 +84,7 @@ class FlipCard extends StatefulWidget {
     this.fill = Fill.none,
     this.initialSide = CardSide.front,
     this.autoFlipDuration,
+    this.curve,
   });
 
   /// The initially shown side of the card
@@ -120,6 +121,9 @@ class FlipCard extends StatefulWidget {
 
   /// This callback is triggered when the card flipping is started
   final VoidCallback? onFlip;
+
+  /// This nullable controll variable is to apply curve
+  final Curve? curve;
 
   /// This callback is triggered when the card flipping is completed
   /// with the final [CardSide]
@@ -160,6 +164,7 @@ class FlipCardState extends State<FlipCard>
   @override
   void initState() {
     super.initState();
+
     controller = AnimationController(
       value: widget.initialSide == CardSide.front ? 0.0 : 1.0,
       duration: widget.duration,
@@ -319,10 +324,18 @@ class FlipCardState extends State<FlipCard>
 
     /// if we need to flip the card on taps, wrap the content
     if (widget.flipOnTouch) {
-      return GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: flip,
-        child: child,
+      return AnimatedBuilder(
+        animation: CurvedAnimation(
+          parent: controller,
+          curve: widget.curve ?? Curves.linear,
+        ),
+        builder: (context, child) {
+          return GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: flip,
+            child: child,
+          );
+        },
       );
     }
 
